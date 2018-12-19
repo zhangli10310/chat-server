@@ -1,6 +1,6 @@
 package com.zl.chat;
 
-import com.zl.chat.handler.MyChannelHandler;
+import com.zl.chat.handler.MsgChannelHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -9,7 +9,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +55,9 @@ public class NettyServer {
 //                            // ChunkedWriteHandler：向客户端发送HTML5文件
 //                            socketChannel.pipeline().addLast("http-chunked", new ChunkedWriteHandler());
                             // 进行设置心跳检测
-                            socketChannel.pipeline().addLast(new IdleStateHandler(5, 0, 0, TimeUnit.SECONDS));
+                            socketChannel.pipeline().addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS));
                             // 配置通道处理  来进行业务处理
-                            socketChannel.pipeline().addLast(new MyChannelHandler());
+                            socketChannel.pipeline().addLast(new MsgChannelHandler());
                         }
                     });
             //绑定端口  开启事件驱动
