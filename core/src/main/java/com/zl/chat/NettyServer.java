@@ -1,6 +1,8 @@
 package com.zl.chat;
 
 import com.zl.chat.handler.MsgChannelHandler;
+import com.zl.chat.handler.MsgHeaderDecoder;
+import com.zl.chat.handler.MsgHeaderEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -48,14 +50,10 @@ public class NettyServer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
-//                            // HttpServerCodec：将请求和应答消息解码为HTTP消息
-//                            socketChannel.pipeline().addLast("http-codec", new HttpServerCodec());
-//                            // HttpObjectAggregator：将HTTP消息的多个部分合成一条完整的HTTP消息
-//                            socketChannel.pipeline().addLast("aggregator", new HttpObjectAggregator(65536));
-//                            // ChunkedWriteHandler：向客户端发送HTML5文件
-//                            socketChannel.pipeline().addLast("http-chunked", new ChunkedWriteHandler());
+                            socketChannel.pipeline().addLast("decoder", new MsgHeaderDecoder());
+                            socketChannel.pipeline().addLast("encoder", new MsgHeaderEncoder());
                             // 进行设置心跳检测
-                            socketChannel.pipeline().addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS));
+                            socketChannel.pipeline().addLast(new IdleStateHandler(3 * 60, 0, 0, TimeUnit.SECONDS));
                             // 配置通道处理  来进行业务处理
                             socketChannel.pipeline().addLast(new MsgChannelHandler());
                         }
