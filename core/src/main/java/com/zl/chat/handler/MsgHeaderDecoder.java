@@ -1,6 +1,6 @@
 package com.zl.chat.handler;
 
-import com.zl.chat.msg.NetMsgHeader;
+import com.zl.chat.msg.MsgHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,7 +17,7 @@ public class MsgHeaderDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        final NetMsgHeader msgXp = new NetMsgHeader();
+        final MsgHeader msgXp = new MsgHeader();
         final InputStream socketInput = new ByteBufInputStream(in);
         boolean ret = msgXp.decode(socketInput);
         IOUtils.closeQuietly(socketInput);

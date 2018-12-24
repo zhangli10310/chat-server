@@ -1,14 +1,15 @@
 package com.zl.chat.handler;
 
 import com.zl.chat.GlobalUserUtil;
-import com.zl.chat.msg.NetMsgHeader;
+import com.zl.chat.msg.MsgConstant;
+import com.zl.chat.msg.MsgHeader;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MsgChannelHandler extends SimpleChannelInboundHandler<NetMsgHeader> {
+public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MsgChannelHandler.class);
@@ -123,25 +124,16 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<NetMsgHeader>
      * @throws Exception
      */
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, NetMsgHeader msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, MsgHeader msg) throws Exception {
         LOGGER.info(ctx.channel().id() + " channelRead0:" + msg);
 
         LOGGER.info(String.format("client req, cmdId=%d, seq=%d", msg.cmdId, msg.seq));
 
         switch (msg.cmdId) {
-            case NetMsgHeader.CMDID_NOOPING://心跳
+            case MsgConstant.CMDID_NOOPING://心跳
                 LOGGER.info("心跳");
 //                    LOGGER.info(String.format("client resp, cmdId=%d, seq=%d, resp.len=%d", msgXp.cmdId, msgXp.seq, msgXp.body == null ? 0 : msgXp.body.length));
                 ctx.writeAndFlush(msg);
-                break;
-
-            default:
-                if (msg.body.length > 0) {
-                    LOGGER.info(new String(msg.body));
-                    msg.body = "resp ok".getBytes();
-                }
-                ctx.writeAndFlush(msg);
-                msg.seq = 9;
                 break;
         }
 

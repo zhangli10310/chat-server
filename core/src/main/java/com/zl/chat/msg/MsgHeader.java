@@ -19,14 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
-public class NetMsgHeader {
+public class MsgHeader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetMsgHeader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MsgHeader.class);
 
     private static final int FIXED_HEADER_SKIP = 4 + 4 + 4 + 4 + 4;
-
-    public static final int CMDID_NOOPING = 6;
-    public static final int CMDID_NOOPING_RESP = 6;
 
     public static final int CLIENTVERSION = 200;
 
@@ -48,7 +45,7 @@ public class NetMsgHeader {
     }
 
     /**
-     * Decode NetMsgHeader from InputStream
+     * Decode MsgHeader from InputStream
      *
      * @param is close input stream yourself
      * @return
@@ -78,7 +75,7 @@ public class NetMsgHeader {
             } else {
                 // no body?!
                 switch (cmdId) {
-                    case CMDID_NOOPING:
+                    case MsgConstant.CMDID_NOOPING:
                         break;
 
                     default:
@@ -96,7 +93,7 @@ public class NetMsgHeader {
     }
 
     public byte[] encode() throws InvalidHeaderException {
-        if (body == null && cmdId != CMDID_NOOPING && cmdId != CMDID_NOOPING_RESP) {
+        if (body == null && cmdId != MsgConstant.CMDID_NOOPING && cmdId != MsgConstant.CMDID_NOOPING_RESP) {
             throw new InvalidHeaderException("invalid header body");
         }
 
