@@ -23,7 +23,6 @@ public class RestfulAspect {
             object = pjp.proceed();
             result.setCode(0);
             result.setData(object);
-            return result;
         } catch (Throwable throwable) {
             result.setCode(-1);
             logger.info(throwable.getMessage());
@@ -34,8 +33,8 @@ public class RestfulAspect {
                 }
             }
             result.setMessage(throwable.getMessage());
-            return result;
         }
+        return result;
     }
 
 }
