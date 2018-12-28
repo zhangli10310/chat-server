@@ -135,6 +135,12 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 //                    LOGGER.info(String.format("client resp, cmdId=%d, seq=%d, resp.len=%d", msgXp.cmdId, msgXp.seq, msgXp.body == null ? 0 : msgXp.body.length));
                 ctx.writeAndFlush(msg);
                 break;
+
+            case MsgConstant.CMDID_LINK_ACCOUNT_CHANNEL:
+                LOGGER.info("关联" + new String(msg.body));
+                msg.body = ctx.channel().id().asLongText().getBytes();
+                ctx.writeAndFlush(msg);
+                break;
         }
 
     }
