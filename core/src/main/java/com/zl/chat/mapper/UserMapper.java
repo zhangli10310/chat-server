@@ -1,7 +1,6 @@
 package com.zl.chat.mapper;
 
 import com.zl.chat.entity.auth.User;
-import com.zl.chat.entity.auth.UserLogin;
 import com.zl.chat.entity.auth.UserRegister;
 import org.apache.ibatis.annotations.*;
 

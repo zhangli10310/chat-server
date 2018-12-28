@@ -9,6 +9,9 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.Set;
+
 public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 
 
@@ -36,6 +39,14 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         LOGGER.info("【handlerRemoved】====>" + ctx.channel().id());
         GlobalUserUtil.channels.remove(ctx.channel());
+
+        Set<Map.Entry<String, Channel>> entrySet = GlobalUserUtil.accountChannel.entrySet();
+        for (Map.Entry<String, Channel> entry : entrySet) {
+            if (entry.getValue() == ctx.channel()) {
+                GlobalUserUtil.accountChannel.remove(entry.getKey());
+                break;
+            }
+        }
     }
 
     /**
@@ -137,9 +148,15 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
                 break;
 
             case MsgConstant.CMDID_LINK_ACCOUNT_CHANNEL:
-                LOGGER.info("关联" + new String(msg.body));
-                msg.body = ctx.channel().id().asLongText().getBytes();
+                String accountId = new String(msg.body);
+                LOGGER.info("关联" + accountId);
+                GlobalUserUtil.accountChannel.put(accountId, ctx.channel());
+                msg.body = ctx.channel().id().asShortText().getBytes();
                 ctx.writeAndFlush(msg);
+                break;
+
+            case MsgConstant.CMDID_SINGLE_TEXT_MSG:
+
                 break;
         }
 
