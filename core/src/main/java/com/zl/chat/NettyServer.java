@@ -53,7 +53,7 @@ public class NettyServer {
                             socketChannel.pipeline().addLast("decoder", new MsgHeaderDecoder());
                             socketChannel.pipeline().addLast("encoder", new MsgHeaderEncoder());
                             // 进行设置心跳检测
-                            socketChannel.pipeline().addLast(new IdleStateHandler(3 * 60, 0, 0, TimeUnit.SECONDS));
+                            socketChannel.pipeline().addLast(new IdleStateHandler(4 * 60, 0, 0, TimeUnit.SECONDS));
                             // 配置通道处理  来进行业务处理
                             socketChannel.pipeline().addLast(new MsgChannelHandler());
                         }

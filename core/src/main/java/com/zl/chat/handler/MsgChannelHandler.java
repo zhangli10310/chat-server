@@ -1,6 +1,8 @@
 package com.zl.chat.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zl.chat.GlobalUserUtil;
+import com.zl.chat.msg.BaseMsgBody;
 import com.zl.chat.msg.MsgConstant;
 import com.zl.chat.msg.MsgHeader;
 import io.netty.channel.*;
@@ -9,6 +11,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +19,8 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MsgChannelHandler.class);
+
+    private ObjectMapper jsonHandler = new ObjectMapper();
 
     /**
      * 连接上服务器
@@ -155,10 +160,27 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
                 ctx.writeAndFlush(msg);
                 break;
 
-            case MsgConstant.CMDID_SINGLE_TEXT_MSG:
-
+            case MsgConstant.CMDID_SEND_SINGLE_TEXT_MSG:
+                handleSingleTextMsg(ctx, msg);
                 break;
         }
+
+    }
+
+    private void handleSingleTextMsg(ChannelHandlerContext ctx, MsgHeader msg) {
+
+        try {
+            BaseMsgBody body = jsonHandler.readValue(msg.body, BaseMsgBody.class);
+            Channel channel = GlobalUserUtil.accountChannel.get(body.getTo());
+            MsgHeader resp = new MsgHeader();
+            resp.cmdId = MsgConstant.CMDID_RECEIVE_SINGLE_TEXT_MSG;
+            resp.body = msg.body;
+            channel.writeAndFlush(resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ctx.writeAndFlush(msg);
 
     }
 

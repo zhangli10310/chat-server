@@ -5,11 +5,9 @@ import com.zl.chat.entity.auth.UserLogin;
 import com.zl.chat.entity.auth.UserRegister;
 import com.zl.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by zhangli on 2017/7/27 23:33.<br/>
@@ -45,7 +43,7 @@ public class UserController {
 
     @PostMapping("/auth/register")
     public Object register(@RequestBody UserRegister param) {
-        if (param.getPassword() == null) {
+        if (param.getPassword() == null || param.getPassword().isEmpty()) {
             throw new RuntimeException("请设置密码");
         }
         while (true) {
@@ -62,5 +60,34 @@ public class UserController {
         }
         userService.insertUser(param);
         return param.getId();
+    }
+
+    @GetMapping("/user/queryById")
+    public Object queryById(@RequestParam("id") String id) {
+
+        User user = userService.selectUserById(id);
+        if (user != null) {
+            user.setPassword(null);
+        }
+        return user;
+    }
+
+    @GetMapping("/user/search")
+    public Object search(@RequestParam("content") String content) {
+        Set<User> set = new HashSet<>();
+        if (content == null || content.isEmpty()) {
+            return set;
+        }
+        User user = userService.selectUserByPhoneNo(content);
+        if (user != null) {
+            user.setPassword(null);
+            set.add(user);
+        }
+        user = userService.selectUserById(content);
+        if (user != null) {
+            user.setPassword(null);
+            set.add(user);
+        }
+        return set;
     }
 }

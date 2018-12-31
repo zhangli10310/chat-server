@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.*;
 @Mapper
 public interface UserMapper {
 
-    String ROW = "id,nick_name,phone_no,sex,city,password";
+    String ROW = "id,nick_name nickName,phone_no phoneNo,sex,city,password";
 
     @Select("<script>"
             + "select " + ROW + " from user where phone_no=#{phone_no}"
