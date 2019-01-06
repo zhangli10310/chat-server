@@ -1,5 +1,6 @@
 package com.zl.chat.handler;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zl.chat.GlobalUserUtil;
 import com.zl.chat.msg.BaseMsgBody;
@@ -21,6 +22,10 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MsgChannelHandler.class);
 
     private ObjectMapper jsonHandler = new ObjectMapper();
+
+    public MsgChannelHandler() {
+        jsonHandler.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     /**
      * 连接上服务器
@@ -161,6 +166,7 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
                 break;
 
             case MsgConstant.CMDID_SEND_SINGLE_TEXT_MSG:
+
                 handleSingleTextMsg(ctx, msg);
                 break;
         }
@@ -171,11 +177,25 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 
         try {
             BaseMsgBody body = jsonHandler.readValue(msg.body, BaseMsgBody.class);
-            Channel channel = GlobalUserUtil.accountChannel.get(body.getTo());
+
+            if (GlobalUserUtil.accountChannel.get(body.getFrom()) == null) {
+                GlobalUserUtil.accountChannel.put(body.getFrom(), ctx.channel());
+                LOGGER.info("关联" + body.getFrom());
+            }
+
             MsgHeader resp = new MsgHeader();
             resp.cmdId = MsgConstant.CMDID_RECEIVE_SINGLE_TEXT_MSG;
             resp.body = msg.body;
-            channel.writeAndFlush(resp);
+            String to = body.getTo();
+            switch (to) {
+                case "all":
+                    GlobalUserUtil.channels.writeAndFlush(resp);
+                    break;
+                default:
+                    Channel channel = GlobalUserUtil.accountChannel.get(to);
+                    channel.writeAndFlush(resp);
+                    break;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
