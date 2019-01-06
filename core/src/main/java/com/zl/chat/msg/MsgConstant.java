@@ -5,6 +5,9 @@ package com.zl.chat.msg;
  */
 public class MsgConstant {
 
+    public static final String SUCCESS = "success";
+    public static final String FAIL = "fail";
+
     public static final int CMDID_NOOPING = 0x06;
     public static final int CMDID_NOOPING_RESP = 0x06;
 

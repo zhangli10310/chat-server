@@ -12,7 +12,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -196,10 +195,13 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
                     channel.writeAndFlush(resp);
                     break;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
+            msg.body = MsgConstant.SUCCESS.getBytes();
+
+        } catch (Exception e) {
+            msg.body = MsgConstant.FAIL.getBytes();
+            LOGGER.error(e.getMessage());
+        }
         ctx.writeAndFlush(msg);
 
     }
