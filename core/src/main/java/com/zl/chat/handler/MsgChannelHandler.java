@@ -196,12 +196,11 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
                     break;
             }
 
-            msg.body = MsgConstant.SUCCESS.getBytes();
-
         } catch (Exception e) {
-            msg.body = MsgConstant.FAIL.getBytes();
+
             LOGGER.error(e.getMessage());
         }
+        msg.body = null;
         ctx.writeAndFlush(msg);
 
     }

@@ -93,9 +93,9 @@ public class MsgHeader {
     }
 
     public byte[] encode() throws InvalidHeaderException {
-        if (body == null && cmdId != MsgConstant.CMDID_NOOPING && cmdId != MsgConstant.CMDID_NOOPING_RESP) {
-            throw new InvalidHeaderException("invalid header body");
-        }
+//        if (body == null && cmdId != MsgConstant.CMDID_NOOPING && cmdId != MsgConstant.CMDID_NOOPING_RESP) {
+//            throw new InvalidHeaderException("invalid header body");
+//        }
 
         final int headerLength = FIXED_HEADER_SKIP + (options == null ? 0 : options.length);
         final int bodyLength = (body == null ? 0 : body.length);
