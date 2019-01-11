@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -49,8 +50,8 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
         LOGGER.info("【handlerRemoved】====>" + ctx.channel().id());
         GlobalUserUtil.channels.remove(ctx.channel());
 
-        Set<Map.Entry<String, Channel>> entrySet = GlobalUserUtil.accountChannel.entrySet();
-        for (Map.Entry<String, Channel> entry : entrySet) {
+        Set<Map.Entry<String, GlobalUserUtil.UserInfo>> entrySet = GlobalUserUtil.accountChannel.entrySet();
+        for (Map.Entry<String, GlobalUserUtil.UserInfo> entry : entrySet) {
             if (entry.getValue() == ctx.channel()) {
                 GlobalUserUtil.accountChannel.remove(entry.getKey());
                 break;
@@ -158,9 +159,8 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 
             case MsgConstant.CMDID_LINK_ACCOUNT_CHANNEL:
                 String accountId = new String(msg.body);
-                LOGGER.info("关联" + accountId);
-                GlobalUserUtil.accountChannel.put(accountId, ctx.channel());
-                msg.body = ctx.channel().id().asShortText().getBytes();
+                GlobalUserUtil.UserInfo info = linkAccount(accountId, ctx.channel());
+                msg.body = info.token.getBytes();
                 ctx.writeAndFlush(msg);
                 break;
 
@@ -172,14 +172,37 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
 
     }
 
+    /**
+     * 关联ID和用户信息
+     * @param id  用户ID
+     * @param channel .
+     */
+    private GlobalUserUtil.UserInfo linkAccount(@NonNull String id, Channel channel) {
+        GlobalUserUtil.UserInfo info = info = new GlobalUserUtil.UserInfo();
+        info.accountId = id;
+        info.channel = channel;
+        info.token = generateToken(channel);
+        LOGGER.info("关联" + id);
+        return info;
+    }
+
+    private String generateToken(Channel channel) {
+        return System.currentTimeMillis() % 10000 + "-" + channel.hashCode() % 10000;
+    }
+
+    private boolean tokenOk(String from, Channel channel) {
+        return true;
+    }
+
     private void handleSingleTextMsg(ChannelHandlerContext ctx, MsgHeader msg) {
 
         try {
             BaseMsgBody body = jsonHandler.readValue(msg.body, BaseMsgBody.class);
 
-            if (GlobalUserUtil.accountChannel.get(body.getFrom()) == null) {
-                GlobalUserUtil.accountChannel.put(body.getFrom(), ctx.channel());
-                LOGGER.info("关联" + body.getFrom());
+            if (!tokenOk(body.getFrom(), ctx.channel())) {
+                msg.body = new byte[]{1};
+                ctx.writeAndFlush(msg);
+                return;
             }
 
             MsgHeader resp = new MsgHeader();
@@ -191,7 +214,7 @@ public class MsgChannelHandler extends SimpleChannelInboundHandler<MsgHeader> {
                     GlobalUserUtil.channels.writeAndFlush(resp);
                     break;
                 default:
-                    Channel channel = GlobalUserUtil.accountChannel.get(to);
+                    Channel channel = GlobalUserUtil.accountChannel.get(to).channel;
                     channel.writeAndFlush(resp);
                     break;
             }

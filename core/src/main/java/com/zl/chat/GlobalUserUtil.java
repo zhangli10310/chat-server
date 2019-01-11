@@ -13,5 +13,13 @@ public class GlobalUserUtil {
     public static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor
             .INSTANCE);
 
-    public static ConcurrentHashMap<String, Channel> accountChannel = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, UserInfo> accountChannel = new ConcurrentHashMap<>();
+
+    public static class UserInfo {
+
+        public String accountId;
+
+        public String token;
+        public Channel channel;
+    }
 }
